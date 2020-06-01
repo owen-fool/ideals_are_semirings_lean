@@ -1,0 +1,8 @@
+[package]
+name = "ideal_semirings"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.10.0"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "a584d527e43639156a2e1bd715986ab082e0dafe"}
