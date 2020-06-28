@@ -396,7 +396,7 @@ lemma ideal_equality_condition {R : Ring} : ∀ (I I' : Ideal R), I.I = I'.I →
                    ∧ (∀ (x y : R.R), I'.I x → I'.I (y * x)))),
   apply propext,
   exact t,
-  cases I, -- had to search through zulip chat to finish proof from here
+  cases I, -- had to search through zulip chat to finish proof of this lemma from here
   cases I', -- all credit to Kenny Lau message in new members 12.11 pm 23rd May
   congr,   -- i think that possibly i've defined ideals in an overcomplicated way, with the axioms
   exact h, -- all as one block, but possibly doing it differently would have meant more congr-ing
