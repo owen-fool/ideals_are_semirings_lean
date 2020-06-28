@@ -84,9 +84,5 @@ structure Ideal (R : Ring) extends Subring R :=
   (left_ideal  : ∀ (x y : R.X), Y x → Y (mult R.X R.S y x))
   (right_ideal : ∀ (x y : R.X), Y x → Y (mult R.X R.S x y))
 
-def z_prod_sum (R : Ring) (I I' : Ideal R) (z :)
+-- some peculiarities here, but i think for ideals we're guarentees now to have zeros, inverses, and closure, at any rate, even if our definition of subrings is a bit dodgy
 
-def num_prod_sum (R : Ring) (I I' : Ideal R) (z : R.X) : ℕ → Prop
-  | 0 := true
-  | 1 := ∃ (x y : R.X), I.Y x ∧ I'.Y y ∧ z = (mult R.X R.S x y)
-  | (nat.succ n) := ∃ (x y : R.X), I.Y x ∧ I'.Y y ∧ (num_prod_sum )
