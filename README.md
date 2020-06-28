@@ -1,1 +1,1 @@
-# Ideals are Semirings Lean
+# Ring Ideals form a Semiring Lean Proof
