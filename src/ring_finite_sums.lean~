@@ -1,0 +1,8 @@
+import rings_and_properties
+
+local infixr ` + ` : 80 := plus
+local infixr ` * ` : 80 := mult
+
+def fin_sum {R : Ring} (f : ℕ → R.R) : ℕ → R.R
+ | 0 := f 0
+ | (nat.succ n) := f (nat.succ n) + fin_sum n
