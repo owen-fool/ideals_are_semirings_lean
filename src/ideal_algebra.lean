@@ -52,10 +52,68 @@ begin
  exact hx,
 end
 
+-- more or less: the total intersection of all members of a set of ideals is also an ideal 
+def min_ideal {R : Ring} (IS : set (Ideal R)) : Ideal R :=
+{ I := {x | ∀ (Id : Ideal R), Id ∈ IS → x ∈ Id.I},
+  ideal_axioms :=
+  begin
+   split,
+   { split,
+     { intros Id hId,
+       exact zero_mem_Ideal Id, },
+     { split,
+       { intros x y hx hy Id hId,
+         specialize hx Id hId,
+         specialize hy Id hId,
+         exact (subgroup_under_addition Id).2.1 x y hx hy, },
+       { intros x x' hxx' hx Id hId,
+         specialize hx Id hId,
+         exact (subgroup_under_addition Id).2.2 x x' hxx' hx }, }, },
+   { split,
+     { intros x y hx Id hId,
+       specialize hx Id hId,
+       exact (multiplication_conditions Id).1 x y hx, },
+     { intros x y hx Id hId,
+       specialize hx Id hId, 
+       exact (multiplication_conditions Id).2 x y hx, }, },
+  end }
+
+-- the set of all ideals that contain (left) products of elements of two given ideals
+def mult_set {R : Ring} (I I' : Ideal R) : set (Ideal R) :=
+{Id | ∀ x y : R.R, x ∈ I.I → y ∈ I'.I → x * y ∈ Id.I}
+
+/-- Ideals are always in their own mult sets -/
+
+lemma mult_set_self_left {R : Ring} (I : Ideal R) : ∀ I' : Ideal R, I ∈ mult_set I I' :=
+begin
+ intros I' x y hx hy,
+ exact (multiplication_conditions I).1 x y hx,
+end
+
+lemma mult_set_self_right {R : Ring} (I : Ideal R) : ∀ I' : Ideal R, I ∈ mult_set I' I :=
+begin
+ intros I' x y hx hy,
+ exact (multiplication_conditions I).2 y x hy
+end
+
 /- Here is where we begin to make use of the finite sum file -/
 
+-- gives a sufficient condition for the value of a finite sum to be in an Ideal
+lemma fin_sum_member_condition {R : Ring} (I : Ideal R) (f : ℕ → R.R) (m : ℕ) :
+(∀ n : ℕ, f n ∈ I.I) → fin_sum f m ∈ I.I :=
+begin
+ intro hn,
+ induction m with m indh,
+ { specialize hn 0,
+   exact hn, },
+ { rw fin_sum,
+   apply (subgroup_under_addition I).2.1, -- if two elements are in an ideal, their sum is as well
+   { exact hn (nat.succ m), },
+   { exact indh }, },
+end
+
 -- the set of finite sums of multiples of elements of a nonempty subset of a Ring forms an Ideal
-def fin_sum_set {R : Ring} (X : set R.R) (H : ∃ x : R.R, x ∈ X) : Ideal R :=
+def fin_sum_ideal {R : Ring} (X : set R.R) (H : ∃ x : R.R, x ∈ X) : Ideal R :=
 { I := {p | ∃ n : ℕ, ∃ f : ℕ → R.R, 
             p = fin_sum f n ∧ ∀ n : ℕ, ∃ x ∈ X, ∃ y z : R.R, f n = y * x * z},
   ideal_axioms :=
@@ -211,8 +269,61 @@ def fin_sum_set {R : Ring} (X : set R.R) (H : ∃ x : R.R, x ∈ X) : Ideal R :=
           mul_fun y fx n = y * fx n : by exact rfl
                      ... = y * (xl * x' * xr) : by rw hx
                      ... = (y * xl) * x' * xr : by exact mult_assoc y xl (x' * xr), }, }, },
-  end
-}
+  end }
+
+-- every element of the set is in the ideal of finite sums of multiples of its elements
+lemma set_in_fin_sum_ideal {R : Ring} (X : set R.R) (H : ∃ x : R.R, x ∈ X) :
+∀ x : R.R, x ∈ X → x ∈ (fin_sum_ideal X H).I :=
+begin
+ intros x hx,
+ existsi 0,
+ existsi λ n, x,
+ split,
+ { exact rfl, },
+ { intro n,
+   existsi x,
+   existsi hx,
+   existsi one,
+   existsi one,
+   symmetry,
+   calc
+    one * x * one = x : by { rw one_mult_neutral_right, exact one_mult_neutral_left x }, },
+end
+
+-- these next two terms may be out of place here
+
+def set_ideal_mult {R : Ring} (I I' : Ideal R) : set R.R :=
+{z | ∃ x ∈ I.I, ∃ y ∈ I'.I, z = x * y} -- the set of products whose first element in one ideal, 
+                                        -- second element in the other.
+-- and this set is not empty
+lemma nonempty_set_ideal_mult {R : Ring} (I I' : Ideal R) : ∃ x : R.R, x ∈ set_ideal_mult I I' :=
+begin
+ existsi zero,
+ existsi zero,
+ existsi zero_mem_Ideal I,
+ existsi zero,
+ existsi zero_mem_Ideal I',
+ symmetry,
+ exact zero_annihilates_left zero,
+end
+
+/- since the set of those products is not empty, we can talk about the ideal of finite sums of 
+   multiples of its elements, and, in particular, we can prove that this ideal is in the mult_set
+   from above -/
+lemma set_ideal_mult_in_mult_set {R : Ring} (I I' : Ideal R) :
+(fin_sum_ideal (set_ideal_mult I I') (nonempty_set_ideal_mult I I')) ∈ mult_set I I' :=
+begin
+ intros x y hx hy,
+ apply set_in_fin_sum_ideal (set_ideal_mult I I') (nonempty_set_ideal_mult I I') (x * y),
+ existsi x,
+ existsi hx,
+ existsi y,
+ existsi hy,
+ exact rfl,
+end
+
+-- this will be used, as mentioned in ring_finite_sums, when we prove that Ideal multiplication
+-- is associative
 
 /-- Next come the operations -/
 
@@ -316,4 +427,6 @@ def Ideal_plus {R : Ring} (I I' : Ideal R) : Ideal R :=
   end }
 local infixr ` ⨁ ` : 80 := Ideal_plus
 
+def Ideal_mult {R : Ring} (I I' : Ideal R) : Ideal R := min_ideal (mult_set I I')
+local infixr ` ⨂ ` : 80 := Ideal_mult
 
