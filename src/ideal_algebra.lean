@@ -325,7 +325,9 @@ end
 -- this will be used, as mentioned in ring_finite_sums, when we prove that Ideal multiplication
 -- is associative
 
-/-- Next come the operations -/
+/-- Next come the operations, they can be found on the wikipedia page, another important source 
+   for me was this webpage: https://equatorialmaths.wordpress.com/2008/04/04/operations-on-ideals/
+-/
 
 def Ideal_plus {R : Ring} (I I' : Ideal R) : Ideal R :=
 { I := {z | ∃ (x y : R.R), x ∈ I.I ∧ y ∈ I'.I ∧ z = x + y},
