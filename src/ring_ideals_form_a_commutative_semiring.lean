@@ -5,6 +5,7 @@ local infixr ` * ` : 80 := mult
 local infixr ` ⨁ ` : 80 := Ideal_plus
 local infixr ` ⨂ ` : 80 := Ideal_mult
 
+/-- See, e.g. here: https://en.wikipedia.org/wiki/Semiring -/
 structure is_idempotent_semiring (X : Type _) :=
 (plus : X → X → X)
 (mult : X → X → X)
@@ -326,6 +327,22 @@ is_idempotent_semiring (Ideal R) :=
     { apply (multiplication_conditions w).2,
       exact hx''', },
     { exact h''', }, },
+  /- The proof of associativity is essentially the same is both directions, the basic idea is that
+     an element is contained in an Ideal product if it is contained in every Ideal which contains
+     all of the products of elements of the Ideals that make up the product, amongst those Ideals
+     (the Ideals containing the products of elements) is the Ideal which contains only finite sums
+     of multiples of products of elements of those Ideals, so each element of any ideal product is
+     expressable as a finite sum. A finite sum is contained in an Ideal if each one of its terms
+     is contained in that Ideal, and the terms of the finite sums expressing elements of our Ideal
+     product are long multiples of elements of our ring. We are considering Ideal products where
+     one of the terms is itself an Ideal product, so the terms of the finite sum contain,
+     themselves, a finite sum, in fact, each term is re-expressible as a finite sum itself, but 
+     this is no problem, since we can then use the same machinery to show that the term is in the
+     Ideal product, by showing that each term of this new finite sum we have expressed it as is 
+     so. We know that an element of the Ring is in our Ideal product if it's a product of elements
+     of the Ring whose terms are in the terms of our Ideal product, so we use associativity of 
+     multiplication in the Ring to rewrite our term of our finite sum as such a product, then we
+     can complete the proof that the element is contained in the other Ideal product. -/
   end,
   mult_liden :=
   begin -- one Ideal is multiplicative identity from the left!
