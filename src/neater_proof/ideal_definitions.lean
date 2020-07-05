@@ -1,4 +1,4 @@
-import rings_and_properties
+import neater_proof.rings_and_properties
 
 local infixr ` + ` : 80 := plus
 local infixr ` * ` : 80 := mult

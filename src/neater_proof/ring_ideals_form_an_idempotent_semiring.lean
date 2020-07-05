@@ -1,4 +1,4 @@
-import ideal_algebra
+import neater_proof.ideal_algebra
 
 local infixr ` + ` : 80 := plus
 local infixr ` * ` : 80 := mult

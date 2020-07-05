@@ -1,5 +1,5 @@
-import rings_and_properties
-import natural_number_lemmas
+import neater_proof.rings_and_properties
+import neater_proof.natural_number_lemmas
 
 local infixr ` + ` : 80 := plus
 local infixr ` * ` : 80 := mult

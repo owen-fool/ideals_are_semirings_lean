@@ -1,5 +1,5 @@
-import ideal_definitions
-import ring_finite_sums
+import neater_proof.ideal_definitions
+import neater_proof.ring_finite_sums
 
 local infixr ` + ` : 80 := plus
 local infixr ` * ` : 80 := mult
