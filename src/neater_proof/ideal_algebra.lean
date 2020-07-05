@@ -411,7 +411,7 @@ def Ideal_plus {R : Ring} (I I' : Ideal R) : Ideal R :=
          { exact (multiplication_conditions I').1 x'' y hx'', },
          { calc
             x * y     = (x' + x'') * y : by rw hx
-                  ... = (x' * y) + x'' * y : by exact distributivity_laws.2 x' x'' y }, }, },
+                  ... = (x' * y) + x'' * y : by exact right_distributivity x' x'' y }, }, },
      { intros x y hx,
        cases hx with x' hx,
        cases hx with x'' hx,
@@ -425,7 +425,7 @@ def Ideal_plus {R : Ring} (I I' : Ideal R) : Ideal R :=
          { exact (multiplication_conditions I').2 x'' y hx'', },
          { calc
             y * x     = y * (x' + x'') : by rw hx
-                  ... = (y * x') + y * x'' : by exact distributivity_laws.1 y x' x'', }, }, }, },
+                  ... = (y * x') + y * x'' : by exact left_distributivity y x' x'', }, }, }, },
   end }
 local infixr ` ⨁ ` : 80 := Ideal_plus
 

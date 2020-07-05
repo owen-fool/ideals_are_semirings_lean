@@ -1,7 +1,5 @@
 universe u
 
-
-
 /-- Well-known definition of Rings, found e.g. here: 
     https://en.wikipedia.org/wiki/Ring_(mathematics)
     i've chosen to include the axioms altogether in one block, this doesn't make too much of a
@@ -10,19 +8,19 @@ universe u
 structure Ring :=
 (R : Type u)
 (ring_struct : (R → R → R) × (R → R → R) × R × R)
-(ring_axioms : ((∀ x y z : R, ring_struct.1 x (ring_struct.1 y z) 
-                            = ring_struct.1 (ring_struct.1 x y) z)
-              ∧ (∀ x y : R, ring_struct.1 x y = ring_struct.1 y x)
-              ∧ (∀ x : R, ring_struct.1 x ring_struct.2.2.1 = x)
-              ∧ (∀ x : R, ∃ x' : R, ring_struct.1 x x' = ring_struct.2.2.1))
-             ∧ ((∀ x y z : R, ring_struct.2.1 x (ring_struct.2.1 y z) 
-                            = ring_struct.2.1 (ring_struct.2.1 x y) z)
-              ∧ (∀ x : R, ring_struct.2.1 x ring_struct.2.2.2 = x)
-              ∧ (∀ x : R, ring_struct.2.1 ring_struct.2.2.2 x = x))
-             ∧ ((∀ x y z : R, ring_struct.2.1 x (ring_struct.1 y z) 
-                            = ring_struct.1 (ring_struct.2.1 x y) (ring_struct.2.1 x z))
-              ∧ (∀ x y z : R, ring_struct.2.1 (ring_struct.1 x y) z 
-                            = ring_struct.1 (ring_struct.2.1 x z) (ring_struct.2.1 y z))))
+(plus_assoc : ∀ x y z : R, ring_struct.1 x (ring_struct.1 y z) 
+                         = ring_struct.1 (ring_struct.1 x y) z)
+(plus_comm  : ∀ x y : R, ring_struct.1 x y = ring_struct.1 y x)
+(plus_iden  : ∀ x : R, ring_struct.1 x ring_struct.2.2.1 = x)
+(plus_inv   : ∀ x : R, ∃ x' : R, ring_struct.1 x x' = ring_struct.2.2.1)
+(mult_assoc : ∀ x y z : R, ring_struct.2.1 x (ring_struct.2.1 y z) 
+                         = ring_struct.2.1 (ring_struct.2.1 x y) z)
+(mult_riden : ∀ x : R, ring_struct.2.1 x ring_struct.2.2.2 = x)
+(mult_liden : ∀ x : R, ring_struct.2.1 ring_struct.2.2.2 x = x)
+(left_distributivity : ∀ x y z : R, ring_struct.2.1 x (ring_struct.1 y z) 
+                                  = ring_struct.1 (ring_struct.2.1 x y) (ring_struct.2.1 x z))
+(right_distributivity : ∀ x y z : R, ring_struct.2.1 (ring_struct.1 x y) z 
+                                   = ring_struct.1 (ring_struct.2.1 x z) (ring_struct.2.1 y z))
 
 -- it's because of the following definitions and lemmas that i can use rings in a natural way
 
@@ -40,26 +38,17 @@ R.ring_struct.2.2.1
 def one {R : Ring} :=
 R.ring_struct.2.2.2
 
-def group_under_addition {R : Ring} :=
-R.ring_axioms.1
-
-def monoid_under_multiplication {R : Ring} :=
-R.ring_axioms.2.1
-
-def distributivity_laws {R : Ring} :=
-R.ring_axioms.2.2
-
 def plus_assoc {R : Ring} : ∀ x y z : R.R, x + y + z = (x + y) + z :=
-group_under_addition.1
+R.plus_assoc
 
 def plus_comm {R : Ring} : ∀ x y : R.R, x + y = y + x :=
-group_under_addition.2.1
+R.plus_comm
 
 def plus_inv {R : Ring} : ∀ x : R.R, ∃ x' : R.R, x + x' = zero :=
-group_under_addition.2.2.2
+R.plus_inv
 
 def zero_plus_neutral {R : Ring} : ∀ x : R.R, x + zero = x :=
-group_under_addition.2.2.1
+R.plus_iden
 
 lemma zero_plus_neutral' {R : Ring} : ∀ x : R.R, x = x + zero :=
 begin
@@ -69,19 +58,19 @@ begin
 end
 
 def mult_assoc {R : Ring} : ∀ x y z : R.R, x * y * z = (x * y) * z :=
-monoid_under_multiplication.1
+R.mult_assoc
 
 def one_mult_neutral_right {R : Ring} : ∀ x : R.R, x * one = x :=
-monoid_under_multiplication.2.1
+R.mult_riden
 
 def one_mult_neutral_left {R : Ring} : ∀ x : R.R, one * x = x :=
-monoid_under_multiplication.2.2
+R.mult_liden
 
 def left_distributivity {R : Ring} : ∀ x y z : R.R, x * (y + z) = (x * y) + (x * z) :=
-distributivity_laws.1
+R.left_distributivity
 
 def right_distributivity {R : Ring} : ∀ x y z : R.R, (x + y) * z = (x * z) + (y * z) :=
-distributivity_laws.2
+R.right_distributivity
 
 lemma plus_inv_unique {R : Ring} : ∀ x y z : R.R, (x + y = zero ∧ x + z = zero) → y = z :=
 begin
