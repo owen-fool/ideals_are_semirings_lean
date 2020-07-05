@@ -346,22 +346,237 @@ is_idempotent_semiring (Ideal R) :=
   end,
   mult_liden :=
   begin -- one Ideal is multiplicative identity from the left!
+   intro w,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hx,
+     specialize hx w, -- x ∈ w if w contains all products of a term in w and a term in Ideal_one
+     apply hx,
+     exact mult_set_self_right w Ideal_one, /- and w does -/ },
+   { intros hx I hI,
+     specialize hI one x, -- x ∈ Ideal_one ⨂ w if, for arbitrary I, I contains all products of
+                          -- an element of Ideal_one and an element of w, implies I contains x,
+                          -- the antecedant implies that I contains one * x, and we're done.
+     rw ← one_mult_neutral_left x,
+     apply hI,
+     { have t : true,
+       { cc, },
+       exact t, }, -- silly trivial proof that one ∈ Ideal_one
+     { exact hx, }, },
   end,
   mult_riden :=
   begin -- one Ideal is multiplicative identity from the right!
+   intro w,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split, -- the body of this proof is almost identical to that above
+   { intro hx,
+     exact hx w (mult_set_self_left w Ideal_one), },
+   { intros hx I hI,
+     rw ← one_mult_neutral_right x,
+     apply hI,
+     { exact hx, },
+     { have t : true,
+       { cc, },
+       exact t, }, },
   end,
   lm_distrib :=
   begin -- Ideal multiplication is distributive from the left!
+   intros w y z,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hx,
+     specialize hx ((w ⨂ y) ⨁ (w ⨂ z)), -- we proceed by showing that, for all x' ∈ w, for all
+     apply hx,                             -- y' ∈ (y ⨁ z), x' * y' ∈ (w ⨂ y) ⨁ (w ⨂ z) 
+     intros x' y' hx' hy',
+     cases hy' with x'' hy',
+     cases hy' with y'' hy',
+     cases hy' with hx'' hy', -- we have that, for some x'' ∈ y, for some y'' ∈ z, y' = x'' + y''
+     cases hy' with hy'' hy',
+     have h : x' * y' = (x' * x'') + (x' * y''),
+     { calc
+        x' * y'     = x' * x'' + y'' : by rw hy'
+                ... = (x' * x'') + x' * y'' : by exact left_distributivity x' x'' y'', },
+     rw h,
+     existsi x' * x'', -- to show that a sum is in a sum Ideal, we can show that its first term is
+     existsi x' * y'', -- in the first Ideal, and it's second in the second Ideal
+     split,
+     { intros I hI,
+       specialize hI x' x'',
+       apply hI,
+       { exact hx', },
+       { exact hx'', }, },
+     { split,
+       { intros I hI,
+         specialize hI x' y'',
+         apply hI,
+         { exact hx', },
+         { exact hy'', }, },
+       { exact rfl, }, }, },
+   { intro hx,
+     cases hx with x' hx,   -- because x is an element a sum Ideal, it itself can be written as a
+     cases hx with y' hx,   -- sum, and we can prove that a sum is an element of an Ideal by 
+     cases hx with hx' hx,  -- proving that each one of its terms is an element of the Ideal
+     cases hx with hy' hx,
+     specialize hx' (w ⨂ y ⨁ z),
+     specialize hy' (w ⨂ y ⨁ z),
+     rw hx,
+     apply (subgroup_under_addition(w ⨂ y ⨁ z)).2.1 x' y',
+     { apply hx', -- all elements in the mult_set of w and y contain x'
+       intros x'' y'' hx'' hy'' I hI,
+       apply hI,
+       { exact hx'' },
+       { existsi y'',
+         existsi zero,
+         split,
+         { exact hy'' },
+         { split,
+           { exact zero_mem_Ideal z, },
+           { calc
+              y''     = y'' + zero : by { symmetry, exact zero_plus_neutral y'', }, }, }, }, },
+     { apply hy', -- similarly for y'
+       intros x'' y'' hx'' hy'' I hI,
+       apply hI,
+       { exact hx'', },
+       { existsi zero,
+         existsi y'',
+         split,
+         { exact zero_mem_Ideal y, },
+         { split,
+           { exact hy'', },
+           { calc
+              y''     = y'' + zero : by { symmetry, exact zero_plus_neutral y'' }
+                  ... = zero + y'' : by exact plus_comm y'' zero, }, }, }, }, },
   end,
   rm_distrib :=
   begin -- Ideal multiplication is distributive from the right!
+   -- this proof is substantially the same as the one above
+   intros w y z,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hx,
+     specialize hx ((w ⨂ z) ⨁ (y ⨂ z)),
+     apply hx,
+     intros x' y' hx' hy',
+     cases hx' with x'' hx',
+     cases hx' with y'' hx',
+     cases hx' with hx'' hx',
+     cases hx' with hy'' hx',
+     have h : x' * y' = (x'' * y') + (y'' * y'),
+     { calc
+        x' * y'     = (x'' + y'') * y' : by rw hx'
+                ... = (x'' * y') + y'' * y' : by exact right_distributivity x'' y'' y' },
+     rw h,
+     existsi (x'' * y'),
+     existsi (y'' * y'),
+     split,
+     { intros I hI,
+       apply hI x'' y',
+       { exact hx'', },
+       { exact hy', }, },
+     { split,
+       { intros I hI,
+         apply hI y'' y',
+         { exact hy'', },
+         { exact hy', }, },
+       { exact rfl, }, }, },
+   { intro hx,
+     cases hx with x' hx,
+     cases hx with y' hx,
+     cases hx with hx' hx,
+     cases hx with hy' hx,
+     specialize hx' ((w ⨁ y) ⨂ z),
+     specialize hy' ((w ⨁ y) ⨂ z),
+     rw hx,
+     apply (subgroup_under_addition ((w ⨁ y) ⨂ z)).2.1,
+     { apply hx',
+       intros x'' y'' hx'' hy'' I hI,
+       apply hI,
+       { existsi x'',
+         existsi zero,
+         split,
+         { exact hx'', },
+         { split,
+           { exact zero_mem_Ideal y, },
+           { calc
+              x'' = x'' + zero : by { symmetry, exact zero_plus_neutral x'', }, }, }, },
+       { exact hy'' }, },
+     { apply hy',
+       intros x'' y'' hx'' hy'' I hI,
+       apply hI,
+       { existsi zero,
+         existsi x'',
+         split,
+         { exact zero_mem_Ideal w, },
+         { split,
+           { exact hx'', },
+           { calc
+              x''     = x'' + zero : by { symmetry, exact zero_plus_neutral x'' }
+                  ... = zero + x'' : by exact plus_comm x'' zero, }, }, },
+       { exact hy'', }, }, },
   end,
   zero_lanni :=
   begin -- zero Ideal annihilates in multiplication from the left!
+   intro w,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hx, -- first we prove that if x ∈ Ideal_zero ⨂ w then x ∈ Ideal_zero, this is easy,
+     exact hx Ideal_zero (mult_set_self_left Ideal_zero w), }, -- since the antecedant implies 
+                                                               -- that x is in all elements of the
+                                                               -- the mult_set of Ideal_zero and
+                                                               -- w, which includes Ideal_zero.
+   { intro hx, -- next we prove that if x ∈ Ideal_zero, then x ∈ Ideal_zero ⨂ w, again easy,
+     have h : x = zero, -- since the antecedant implies that x = zero, and all Ideals contain zero
+     { exact hx },
+     rw h,
+     exact zero_mem_Ideal (Ideal_zero ⨂ w), },
   end,
   zero_ranni :=
   begin -- zero Ideal annihilates in multiplication from the right!
+   -- this proof is substantially the same as the above.
+   intro w,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hx,
+     exact hx Ideal_zero (mult_set_self_right Ideal_zero w), },
+   { intro hx,
+     have h : x = zero,
+     { exact hx, },
+     rw h,
+     exact zero_mem_Ideal (w ⨂ Ideal_zero), },
   end,
   plus_idemp :=
   begin -- Ideal addition is idempotent!
-  end }
+   intro x,
+   apply ideal_equality_condition,
+   funext,
+   apply propext,
+   split,
+   { intro hz, -- if z ∈  x ⨁ x, then there is an x' ∈ x and a y ∈ x st. z = x' + y', and then
+     cases hz with x' hz, -- we must have z ∈ x, since Ideals are closed under addition.
+     cases hz with y' hz,
+     cases hz with hx' hz,
+     cases hz with hy' hz,
+     rw hz,
+     exact (subgroup_under_addition x).2.1 x' y' hx' hy', },
+   { intro hz, -- conversely if z ∈ x then there exists an element of x and an element of x st.
+     existsi z, -- their sum is z, namely z itself, and zero.
+     existsi zero,
+     split,
+     { exact hz, },
+     { split,
+       { exact zero_mem_Ideal x, },
+       { calc
+          z = z + zero : by { symmetry, exact zero_plus_neutral z, }, }, }, },
+  end } -- Ring Ideals form an Idempotent Semiring.
